@@ -6,12 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     {% tailwind_css %}
+    <style>
+        .bg_grad_body {
+            background: linear-gradient(to bottom, rgba(255, 165, 0, 0.6), rgba(0, 0, 0, 0.9));
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+          }
+    </style>
 </head>
-<body>
-    <center>
-        {% block content %}
-        
-        {% endblock content %}
-    </center>
+<body class="bg_grad_body bg-no-repeat bg-cover bg-center">
+    {% block navi %}{% endblock navi %}
+    {% block etud %}{% endblock etud %}
+    {% block wellog %}{% endblock wellog %}
+    {% block login %} {% endblock login %}
+    {% block register %}{% endblock register %}
 </body>
 </html>

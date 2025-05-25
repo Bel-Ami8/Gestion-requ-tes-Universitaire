@@ -10,19 +10,19 @@ class UserAdmin(BaseUserAdmin):
     model = User
 
     list_display = ('username', 'email', 'is_staff', 'is_superuser')
-    list_filter = ('is_staff', 'is_superuser', 'is_etudiant', 'is_receptionniste','is_reception_departement','is_fac_gestionnaire')
+    list_filter = ('is_staff', 'is_superuser', 'is_etudiant', 'is_receptionniste')
 
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         ('Informations personnelles', {'fields': ('first_name', 'last_name', 'email', 'matricule', 'faculte', 'departement', 'filiere', 'niveau')}),
         ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Rôles', {'fields': ('is_etudiant', 'is_receptionniste', 'is_reception_departement', 'is_fac_gestionnaire')}),
+        ('Rôles', {'fields': ('is_etudiant', 'is_receptionniste')}),
     )
 
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username','first_name', 'last_name', 'email', 'matricule', 'faculte', 'departement', 'filiere', 'niveau', 'password1', 'password2', 'is_etudiant', 'is_receptionniste', 'is_reception_departement', 'is_fac_gestionnaire'),
+            'fields': ('username','first_name', 'last_name', 'email', 'matricule', 'faculte', 'departement', 'filiere', 'niveau', 'password1', 'password2', 'is_etudiant', 'is_receptionniste'),
         }),
     )
     search_fields = ('username', 'email', 'matricule')

@@ -3,8 +3,6 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):# Create your models here.
    is_receptionniste = models.BooleanField(default=False)
-   is_reception_departement = models.BooleanField(default=False)
-   is_fac_gestionnaire = models.BooleanField(default=False)
    is_etudiant = models.BooleanField(default=True)
    
    matricule = models.CharField(max_length=30, unique=True, null=True, blank=True)  # seulement pour étudiant
@@ -24,11 +22,7 @@ class User(AbstractUser):# Create your models here.
     if self.is_etudiant:
         role = "Étudiant"
     elif self.is_receptionniste:
-        role = "Réceptionniste Central"
-    elif self.is_reception_departement:
-        role = "Réceptionniste Département"
-    elif self.is_fac_gestionnaire:
-        role = "Gestionnaire Faculté"
+        role = "Réceptionniste"
     else:
         role = "Utilisateur"
     return f"{self.username} ({role})"
@@ -52,6 +46,12 @@ class Departement(models.Model):
 class Filiere(models.Model):
     nom = models.CharField(max_length=100)
     departement = models.ForeignKey(Departement, on_delete=models.CASCADE, related_name='filieres')
-
+    receptionniste = models.ForeignKey(
+        'User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        limit_choices_to={'is_receptionniste': True},  # filtrer seulement les réceptionnistes
+        related_name='filieres_assignees')
     def __str__(self):
         return f"{self.nom} - {self.departement.nom}"

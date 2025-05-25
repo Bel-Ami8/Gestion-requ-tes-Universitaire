@@ -17,10 +17,6 @@ def home(request):
                 return redirect('etudiant')
             elif user.is_receptionniste:
                 return redirect('receptionniste')
-            elif user.is_reception_departement:
-                return redirect('reception_depart')
-            elif user.is_fac_gestionnaire:
-                return redirect('fac_gestionnaire')
         else:
             error = 'mot de passe ou utilisateur incorrect'
     return render(request, 'login.html', {'error':error})
@@ -42,11 +38,3 @@ def etudiant(request):
 
 def receptionniste(request):
     return render(request,'receptionniste.html')
-
-
-def reception_depart(request):
-    return render(request,'reception_depart.html')
-
-
-def fac_gestionnaire(request):
-    return render(request,'fac_gestionnaire.html')

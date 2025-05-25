@@ -1,7 +1,28 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load static %}
 
-{% block content %}
+{% block navi%}
+   <div class=" fixed z-10 container max-w-full bg-yellow-900">
+      <div class="flex m-3 flex-row relative items-center gap-10">
+         <div>
+            <img src="{% static 'images/loguniv.png' %}" alt="logo université" class="w-14">
+         </div>
+         <div class="text-white hover:scale-105">
+            <a href="#" class="hover:ring-2 ring-offset-1">Acceuil</a>
+         </div>
+         <div class="text-white m-4 hover:scale-105">
+            <a href="#" class="hover:ring-2 ring-offset-1">notifications</a>
+         </div>
+         <div class="text-white m-4 hover:scale-105">
+            <a href="#" class="hover:ring-2 ring-offset-1">messages</a>
+         </div>
+         <div class="text-white absolute right-25 m-4 hover:scale-105">
+            <a href="{% url 'register' %}" class="hover:ring-2 ring-offset-1">Déconnexion</a>
+         </div>
+      </div>
+   </div>
+{% endblock navi %}
 
-   <h1>bienvenue cher receptionniste</h1>
-
-{% endblock %}
+{% block etud %}
+<h1 class="text-black-500 text-[50px] font-black text-center translate-y-[90px]"> Bienvenue cher receptionniste</h1>
+{% endblock etud %}
