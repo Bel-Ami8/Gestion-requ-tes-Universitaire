@@ -1,27 +1,84 @@
 {% load static tailwind_tags %}
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    {% tailwind_css %}
-    <style>
-        .bg_grad_body {
-            background: linear-gradient(to bottom, rgba(255, 165, 0, 0.6), rgba(0, 0, 0, 0.9));
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-          }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Gestion des Requêtes Universitaires{% endblock %}</title>
+  {% tailwind_css %}
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body class="bg_grad_body bg-no-repeat bg-cover bg-center">
-    {% block navi %}{% endblock navi %}
-    {% block etud %}{% endblock etud %}
-    {% block wellog %}{% endblock wellog %}
-    {% block login %} {% endblock login %}
+
+<body class="flex flex-col bg-amber-50 text-gray-800 min-h-screen">
+
+  <!-- Barre de navigation -->
+  <nav class="bg-orange-400 text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex">
+          <div>
+            <img src="{% static 'images/loguniv.png' %}" alt="logo université" class="w-14">
+         </div>
+          <div class="flex-shrink-0 flex items-center">
+            <h1 class="text-xl font-bold">Gestion de Requêtes</h1>
+          </div>
+        </div>
+
+        <div class="flex items-center">
+          {% if user.is_authenticated %}
+            <a href="#" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
+              Mon Espace
+            </a>
+            <a href="#" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
+              Messages
+            </a>
+            <form action="{% url 'logout' %}" method="post" class="inline">
+              {% csrf_token %}
+              <button type="submit" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
+                Déconnexion
+              </button>
+            </form>
+          {% else %}
+            <a href="#" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
+              Connexion
+            </a>
+            <a href="{% url 'register' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
+              Inscription
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Messages d'alerte -->
+  {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+      {% for message in messages %}
+        <div class="p-4 mb-4 rounded-md
+          {% if message.tags == 'success' %}bg-green-100 text-green-700
+          {% elif message.tags == 'error' %}bg-red-100 text-red-700
+          {% else %}bg-blue-100 text-blue-700{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- Zone de contenu principale -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+    {% block login %}{% endblock login %}
     {% block register %}{% endblock register %}
+    {% block content %}{% endblock content %}
+  </main>
+
+  <!-- Pied de page -->
+  <footer class="bg-gray-800 text-white mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <p class="text-center text-sm">&copy; {% now "Y" %} Gestion des Requêtes Universitaires. Tous droits réservés.</p>
+    </div>
+  </footer>
+
 </body>
 </html>

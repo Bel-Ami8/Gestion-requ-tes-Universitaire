@@ -1,28 +1,109 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends "base.html" %}
 
-{% block navi%}
-   <div class=" fixed z-10 container max-w-full bg-yellow-900">
-      <div class="flex m-3 flex-row relative items-center gap-10">
-         <div>
-            <img src="{% static 'images/loguniv.png' %}" alt="logo université" class="w-14">
-         </div>
-         <div class="text-white hover:scale-105">
-            <a href="#" class="hover:ring-2 ring-offset-1">Acceuil</a>
-         </div>
-         <div class="text-white m-4 hover:scale-105">
-            <a href="#" class="hover:ring-2 ring-offset-1">notifications</a>
-         </div>
-         <div class="text-white m-4 hover:scale-105">
-            <a href="#" class="hover:ring-2 ring-offset-1">messages</a>
-         </div>
-         <div class="text-white absolute right-25 m-4 hover:scale-105">
-            <a href="{% url 'register' %}" class="hover:ring-2 ring-offset-1">Déconnexion</a>
-         </div>
-      </div>
-   </div>
-{% endblock navi %}
+{% block title %}Espace Administrateur{% endblock %}
 
-{% block etud %}
-<h1 class="text-black-500 text-[50px] font-black text-center translate-y-[90px]"> Bienvenue cher receptionniste</h1>
-{% endblock etud %}
+{% block content %}
+<div class="space-y-6">
+    <!-- En-tête d'accueil -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Tableau de bord administrateur</h1>
+        <p class="text-gray-600">Gérez les requêtes et les utilisateurs de la plateforme.</p>
+    </div>
+
+    <!-- Tableau de bord statistique -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Requêtes en attente</h3>
+            <p class="text-3xl font-bold text-yellow-600">{{ requetes_en_attente|default:0 }}</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Requêtes traitées</h3>
+            <p class="text-3xl font-bold text-green-600">{{ requetes_traitees|default:0 }}</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Total étudiants</h3>
+            <p class="text-3xl font-bold text-blue-600">{{ total_etudiants|default:0 }}</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Messages non lus</h3>
+            <p class="text-3xl font-bold text-red-600">{{ messages_non_lus|default:0 }}</p>
+        </div>
+    </div>
+
+    <!-- Actions principales -->
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Actions rapides</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a href="#" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Gérer les requêtes
+            </a>
+            <a href="#" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Gérer les utilisateurs
+            </a>
+            <a href="#" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700">
+                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Générer un rapport
+            </a>
+        </div>
+    </div>
+
+    <!-- Liste des requêtes récentes -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-gray-900">Requêtes récentes</h2>
+            <a href="#" class="text-sm text-blue-600 hover:text-blue-800">Voir tout</a>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Étudiant</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Titre</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% if requetes %}
+                        {% for requete in requetes %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{{ requete.id }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="text-sm font-medium text-gray-900">{{ requete.etudiant.get_full_name }}</div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ requete.titre }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ requete.date_creation|date:"d/m/Y" }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if requete.statut == 'en_cours' %}bg-yellow-100 text-yellow-800{% elif requete.statut == 'traite' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ requete.get_statut_display }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="#" class="text-blue-600 hover:text-blue-900 mr-3">Voir</a>
+                                    <a href="#" class="text-green-600 hover:text-green-900">Traiter</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Aucune requête pour le moment</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

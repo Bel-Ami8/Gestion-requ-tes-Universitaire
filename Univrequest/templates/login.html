@@ -6,34 +6,12 @@
       background-color: #FAF0E6;
    }
 </style>
-{% block navi%}
-   <div class=" fixed z-10 container max-w-full bg-yellow-900">
-      <div class="flex m-3 flex-row relative items-center gap-10">
-         <div>
-            <img src="{% static 'images/loguniv.png' %}" alt="logo université" class="w-14">
-         </div>
-         <div class="text-white hover:scale-105">
-            <a href="#" class="hover:ring-2 ring-offset-1">Acceuil</a>
-         </div>
-         <div class="text-white m-4 hover:scale-105">
-            <a href="#" class="hover:ring-2 ring-offset-1">A propos de nous</a>
-         </div>
-         <div class="text-white absolute right-25 m-4 hover:scale-105">
-            <a href="{% url 'register' %}" class="hover:ring-2 ring-offset-1">S'inscrire</a>
-         </div>
-      </div>
-   </div>
-{% endblock navi %}
-{% block wellog %}
-   <h1 class="text-black-500 text-[50px] font-black text-center translate-y-[90px]"> Bienvenue</h1>
-   <h2 class="text-black-500 text-[20px] font-light text-center translate-y-[110px]"> Platforme de gestion de requêtes</h2>
-{% endblock wellog %}
 
 {% block login %}
 
-<div class="min-h-screen flex items-center justify-center">
+<div class="flex items-center justify-center">
 
-   <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md opacity-100">
+   <div class="bg-amber-100 p-8 rounded-lg shadow-md w-full max-w-md opacity-100">
       <h1 class="text-2xl font-bold mb-4 text-center text-orange-400">Connexion</h1>
       
       {% if error %}
