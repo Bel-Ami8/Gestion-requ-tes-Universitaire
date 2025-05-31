@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block detailreq %}
+<div class="container mx-auto py-4">
+  <h1 class="text-2xl font-bold mb-4">{{ requete.titre }}</h1>
+
+  <div class="space-y-2">
+    <p><strong>Description :</strong> {{ requete.descrition }}</p>
+    <p><strong>Priorité :</strong> {{ requete.get_priorite_display }}</p>
+    <p><strong>Statut :</strong> {{ requete.get_statut_display }}</p>
+    <p><strong>Document :</strong>
+      {% if requete.document %}
+      <a href="{{ requete.document.fichier.url }}" target="_blank" class="text-blue-500 underline">Voir le document</a>
+      {% else %}
+      Aucun document
+      {% endif %}
+    </p>
+    <p><strong>Date de création :</strong> {{ requete.date_creation }}</p>
+  </div>
+
+  <a href="{% url 'lister_requetes' %}" class="mt-4 inline-block bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Retour</a>
+</div>
+{% endblock %}

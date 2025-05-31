@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm,UserChangeForm
 
-from Univrequest.models import User
+from Univrequest.models import Documents, Requetes, User,Message
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -51,3 +51,69 @@ class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = User
         fields = '__all__'  # ou listez les champs manuellement si vous préférez
+
+
+class MessageForm(forms.ModelForm):
+    fichiers_upload = forms.FileField(
+        widget=forms.FileInput(attrs={'class': 'form-control-file'}),  # Ici on utilise FileInput au lieu de ClearableFileInput
+        required=False,
+        label="Pièces jointes"
+    )
+
+    class Meta:
+        model = Message
+        fields = ['destinataire', 'sujet', 'contenu']
+
+        widgets = {
+            'destinataire': forms.Select(attrs={'class': 'form-select'}),
+            'sujet': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Sujet'}),
+            'contenu': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Écris ton message ici...'}),
+        }
+
+
+class ReceptionnisteUserChangeForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = (
+            'username', 'first_name', 'last_name', 'email',
+            'matricule', 'faculte', 'departement', 'filiere', 'niveau',
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        base_classes = 'w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-orange-500'
+
+        for field_name, field in self.fields.items():
+            widget = field.widget
+            if isinstance(widget, forms.Select):
+                widget.attrs.update({
+                    'class': base_classes + ' bg-white text-gray-700',
+                })
+            elif isinstance(widget, (forms.TextInput, forms.EmailInput, forms.PasswordInput)):
+                widget.attrs.update({
+                    'class': base_classes,
+                    'placeholder': field.label
+                })
+            elif isinstance(widget, forms.Textarea):
+                widget.attrs.update({
+                    'class': base_classes + ' h-32 resize-none',
+                    'placeholder': field.label
+                })
+            else:
+                widget.attrs.update({
+                    'class': base_classes
+                })
+
+
+class RequeteReceptionnisteForm(forms.ModelForm):
+    class Meta:
+        model = Requetes
+        fields = ('statut', 'priorite', 'document', 'descrition')
+        widgets = {
+            'statut': forms.Select(attrs={'class': 'border rounded p-2'}),
+            'note_traitement': forms.Textarea(attrs={
+                'class': 'border rounded p-2',
+                'rows': 4,
+                'placeholder': 'Ajouter une note…'
+            }),
+        }

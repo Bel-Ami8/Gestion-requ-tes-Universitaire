@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block modifutil %}
+<div class="container mx-auto py-4">
+    <h1 class="text-2xl font-bold mb-4">Modifier l'étudiant : {{ etudiant.username }}</h1>
+    <form method="POST" class="space-y-4">
+        {% csrf_token %}
+
+        <!-- Username -->
+        <div>
+            <label for="{{ form.username.id_for_label }}" class="block font-semibold mb-1">Nom d'utilisateur</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <p class="text-red-500 text-sm">{{ form.username.errors }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Prénom -->
+        <div>
+            <label for="{{ form.first_name.id_for_label }}" class="block font-semibold mb-1">Prénom</label>
+            {{ form.first_name }}
+            {% if form.first_name.errors %}
+                <p class="text-red-500 text-sm">{{ form.first_name.errors }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Nom -->
+        <div>
+            <label for="{{ form.last_name.id_for_label }}" class="block font-semibold mb-1">Nom</label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}
+                <p class="text-red-500 text-sm">{{ form.last_name.errors }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label for="{{ form.email.id_for_label }}" class="block font-semibold mb-1">Email</label>
+            {{ form.email }}
+            {% if form.email.errors %}
+                <p class="text-red-500 text-sm">{{ form.email.errors }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Matricule -->
+        <div>
+            <label for="{{ form.matricule.id_for_label }}" class="block font-semibold mb-1">Matricule</label>
+            {{ form.matricule }}
+            {% if form.matricule.errors %}
+                <p class="text-red-500 text-sm">{{ form.matricule.errors }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Faculté -->
+        <div>
+            <label for="{{ form.faculte.id_for_label }}" class="block font-semibold mb-1">Faculté</label>
+            {{ form.faculte }}
+            {% if form.faculte.errors %}
+                <p class="text-red-500 text-sm">{{ form.faculte.errors }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Département -->
+        <div>
+            <label for="{{ form.departement.id_for_label }}" class="block font-semibold mb-1">Département</label>
+            {{ form.departement }}
+            {% if form.departement.errors %}
+                <p class="text-red-500 text-sm">{{ form.departement.errors }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Filière -->
+        <div>
+            <label for="{{ form.filiere.id_for_label }}" class="block font-semibold mb-1">Filière</label>
+            {{ form.filiere }}
+            {% if form.filiere.errors %}
+                <p class="text-red-500 text-sm">{{ form.filiere.errors }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Niveau -->
+        <div>
+            <label for="{{ form.niveau.id_for_label }}" class="block font-semibold mb-1">Niveau</label>
+            {{ form.niveau }}
+            {% if form.niveau.errors %}
+                <p class="text-red-500 text-sm">{{ form.niveau.errors }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Boutons -->
+        <div class="flex items-center gap-4">
+            <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded">Enregistrer</button>
+            <a href="{% url 'gestion_utilisateurs' %}" class="text-gray-600">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load form_tags %}
+
+
+{% block envoyer %}
+<div class="max-w-2xl mx-auto p-6 bg-white shadow rounded">
+  <h2 class="text-2xl font-bold mb-4">Envoyer un message</h2>
+  
+  <form method="POST" enctype="multipart/form-data" class="space-y-4">
+    {% csrf_token %}
+    
+    <!-- Destinataire -->
+    <div>
+      <label for="{{ form.destinataire.id_for_label }}" class="block text-sm font-medium text-gray-700">Destinataire</label>
+      {{ form.destinataire|add_class:"block w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring focus:border-blue-300" }}
+      {% if form.destinataire.errors %}
+        <p class="text-red-500 text-sm mt-1">{{ form.destinataire.errors }}</p>
+      {% endif %}
+    </div>
+    
+    <!-- Sujet -->
+    <div>
+      <label for="{{ form.sujet.id_for_label }}" class="block text-sm font-medium text-gray-700">Sujet</label>
+      {{ form.sujet|add_class:"block w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring focus:border-blue-300" }}
+      {% if form.sujet.errors %}
+        <p class="text-red-500 text-sm mt-1">{{ form.sujet.errors }}</p>
+      {% endif %}
+    </div>
+    
+    <!-- Contenu -->
+    <div>
+      <label for="{{ form.contenu.id_for_label }}" class="block text-sm font-medium text-gray-700">Contenu</label>
+      {{ form.contenu|add_class:"block w-full mt-1 border border-gray-300 rounded p-2 focus:outline-none focus:ring focus:border-blue-300" }}
+      {% if form.contenu.errors %}
+        <p class="text-red-500 text-sm mt-1">{{ form.contenu.errors }}</p>
+      {% endif %}
+    </div>
+    
+    <!-- Pièces jointes -->
+    <div>
+      <label for="{{ form.fichiers_upload.id_for_label }}" class="block text-sm font-medium text-gray-700">Pièces jointes</label>
+      {{ form.fichiers_upload|add_class:"block w-full mt-1 text-gray-700 border border-gray-300 rounded p-2 file:bg-blue-50 file:border-none file:rounded file:mr-2" }}
+      {% if form.fichiers_upload.errors %}
+        <p class="text-red-500 text-sm mt-1">{{ form.fichiers_upload.errors }}</p>
+      {% endif %}
+    </div>
+    
+    <!-- Bouton -->
+    <div>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+        Envoyer
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

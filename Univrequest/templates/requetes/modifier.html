@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block modifreq %}
+<div class="container mx-auto py-4">
+  <h1 class="text-2xl font-bold mb-4">Modifier la requête</h1>
+
+  <form method="POST" class="space-y-4">
+    {% csrf_token %}
+
+    {% for field in form %}
+    <div>
+      <label for="{{ field.id_for_label }}" class="block font-semibold text-gray-700">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}
+      <p class="text-xs text-gray-500">{{ field.help_text }}</p>
+      {% endif %}
+      {% if field.errors %}
+      <p class="text-xs text-red-500">{{ field.errors }}</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded">Enregistrer</button>
+    <a href="{% url 'lister_requetes' %}" class="ml-4 text-gray-600">Annuler</a>
+  </form>
+</div>
+{% endblock %}

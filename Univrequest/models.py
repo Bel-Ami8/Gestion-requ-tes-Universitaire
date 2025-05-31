@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -55,3 +56,104 @@ class Filiere(models.Model):
         related_name='filieres_assignees')
     def __str__(self):
         return f"{self.nom} - {self.departement.nom}"
+
+class Requetes(models.Model):
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    type_requete = models.ForeignKey('TypeRequetes', on_delete=models.CASCADE)
+
+    titre = models.CharField(max_length=100)
+    descrition = models.TextField(blank=True, null=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_suppression = models.DateTimeField(blank=True, null=True)
+    PRIORITE_CHOICES = [
+        ('faible', 'Faible'),
+        ('moyenne', 'Moyenne'),
+        ('haute', 'Haute')
+    ]
+    priorite = models.CharField(max_length=10, choices=PRIORITE_CHOICES, default='moyenne')
+
+    # Statut
+    STATUT_CHOICES = [
+        ('en_cours', 'En cours'),
+        ('traitee', 'Traité'),
+        ('rejete', 'Rejeté')
+    ]
+    statut = models.CharField(max_length=50, choices=STATUT_CHOICES, default='en_cours')
+    document = models.ForeignKey('Documents', on_delete=models.SET_NULL, null=True, blank=True)
+
+    def __str__(self):
+        return self.titre
+
+
+class TypeRequetes(models.Model):
+    libelle = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.libelle
+
+
+class Documents(models.Model):
+    fichier = models.FileField(upload_to='documents/')
+    nom_fichier = models.CharField(max_length=255)
+    chemin_fichier = models.CharField(max_length=255)
+    type_fichier = models.CharField(max_length=50)
+    taille = models.IntegerField()
+    date_ajout = models.DateTimeField(auto_now_add=True)
+    requete = models.ForeignKey('Requetes', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.nom_fichier
+
+
+class Rapport(models.Model):
+    date_traitement = models.DateTimeField()
+    resultat = models.TextField(blank=True, null=True)
+    commentaire = models.TextField(blank=True, null=True)
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Rapport {self.id} - {self.date_traitement}"
+
+
+class MiseAJourRequete(models.Model):
+    date_modif = models.DateTimeField(auto_now=True)
+    commentaire = models.TextField(blank=True, null=True)
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    requete = models.ForeignKey('Requetes', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Mise à jour {self.id} - {self.requete.titre}"
+
+
+class Notification(models.Model):
+    contenu = models.TextField()
+    date_envoi = models.DateTimeField(auto_now_add=True)
+    statut = models.CharField(max_length=50, choices=[('non_lu', 'Non lu'), ('lu', 'Lu')], default='non_lu')
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    requete = models.ForeignKey('Requetes', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Notification {self.id} - {self.utilisateur.username}"
+
+
+class RequeteRapport(models.Model):
+    requete = models.ForeignKey('Requetes', on_delete=models.CASCADE)
+    rapport = models.ForeignKey('Rapport', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"RequeteRapport - {self.requete.titre} / {self.rapport.id}"
+
+
+class Message(models.Model):
+    contenu = models.TextField()
+    date_envoie = models.DateTimeField(auto_now_add=True)
+    sujet = models.CharField(max_length=255, blank=True)
+    statut = models.CharField(max_length=50, choices=[('envoye', 'Envoyé'), ('recu', 'Reçu')], default='envoye')
+    expediteur = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='messages_envoyes', on_delete=models.CASCADE)
+    destinataire = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='messages_recus', on_delete=models.CASCADE)
+    requete = models.ForeignKey('Requetes', on_delete=models.CASCADE)
+    lu = models.BooleanField(default=False)
+    fichiers = models.ManyToManyField('Documents', blank=True) 
+
+    def __str__(self):
+        return f"De {self.expediteur} à {self.destinataire} - {self.date_envoi}"

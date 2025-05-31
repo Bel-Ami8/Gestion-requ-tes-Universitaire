@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block listereq %}
+<div class="container mx-auto py-4">
+  <h1 class="text-2xl font-bold mb-4">Liste des requêtes</h1>
+
+  <table class="min-w-full border border-gray-200 rounded">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="px-4 py-2">Titre</th>
+        <th class="px-4 py-2">Priorité</th>
+        <th class="px-4 py-2">Statut</th>
+        <th class="px-4 py-2">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for requete in requetes %}
+      <tr class="border-t">
+        <td class="px-4 py-2">{{ requete.titre }}</td>
+        <td class="px-4 py-2">{{ requete.get_priorite_display }}</td>
+        <td class="px-4 py-2">{{ requete.get_statut_display }}</td>
+        <td class="px-4 py-2">
+          <a href="{% url 'detail_requete' requete.id %}" class="text-blue-500 hover:underline">Voir</a> |
+          <a href="{% url 'modifier_requete' requete.id %}" class="text-orange-500 hover:underline">Modifier</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" class="text-center py-4">Aucune requête trouvée.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -30,7 +30,7 @@
             <a href="#" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
               Mon Espace
             </a>
-            <a href="#" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
+            <a href="{% url 'boite_de_reception' %}" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700">
               Messages
             </a>
             <form action="{% url 'logout' %}" method="post" class="inline">
@@ -71,6 +71,12 @@
     {% block login %}{% endblock login %}
     {% block register %}{% endblock register %}
     {% block content %}{% endblock content %}
+    {% block envoyer %}{% endblock envoyer %}
+    {% block gestionutil %}{% endblock gestionutil %}
+    {% block modifutil %}{% endblock modifutil %}
+    {% block listereq %}{% endblock listereq %}
+    {% block detailreq %}{% endblock detailreq %}
+    {% block modifreq %}{% endblock modifreq %}
   </main>
 
   <!-- Pied de page -->
