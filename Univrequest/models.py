@@ -59,7 +59,7 @@ class Filiere(models.Model):
 
 class Requetes(models.Model):
     utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    type_requete = models.ForeignKey('TypeRequetes', on_delete=models.CASCADE)
+    type_requete = models.ForeignKey('TypeRequetes', on_delete=models.CASCADE, blank=False, null=False)
 
     titre = models.CharField(max_length=100)
     descrition = models.TextField(blank=True, null=True)
@@ -74,12 +74,13 @@ class Requetes(models.Model):
 
     # Statut
     STATUT_CHOICES = [
+        ('en_attente', 'En attente'),
         ('en_cours', 'En cours'),
         ('traitee', 'Traité'),
         ('rejete', 'Rejeté')
     ]
-    statut = models.CharField(max_length=50, choices=STATUT_CHOICES, default='en_cours')
-    document = models.ForeignKey('Documents', on_delete=models.SET_NULL, null=True, blank=True)
+    statut = models.CharField(max_length=50, choices=STATUT_CHOICES, default='en_attente')
+    documents = models.ManyToManyField('Documents', blank=True, related_name='requete_documents')
 
     def __str__(self):
         return self.titre
@@ -99,7 +100,7 @@ class Documents(models.Model):
     type_fichier = models.CharField(max_length=50)
     taille = models.IntegerField()
     date_ajout = models.DateTimeField(auto_now_add=True)
-    requete = models.ForeignKey('Requetes', on_delete=models.CASCADE)
+
 
     def __str__(self):
         return self.nom_fichier
@@ -156,4 +157,4 @@ class Message(models.Model):
     fichiers = models.ManyToManyField('Documents', blank=True) 
 
     def __str__(self):
-        return f"De {self.expediteur} à {self.destinataire} - {self.date_envoi}"
+        return f"De {self.expediteur} à {self.destinataire} - {self.date_envoie}"

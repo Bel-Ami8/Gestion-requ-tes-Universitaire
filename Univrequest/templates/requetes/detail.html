@@ -8,16 +8,26 @@
     <p><strong>Description :</strong> {{ requete.descrition }}</p>
     <p><strong>Priorité :</strong> {{ requete.get_priorite_display }}</p>
     <p><strong>Statut :</strong> {{ requete.get_statut_display }}</p>
-    <p><strong>Document :</strong>
-      {% if requete.document %}
-      <a href="{{ requete.document.fichier.url }}" target="_blank" class="text-blue-500 underline">Voir le document</a>
+    <p><strong>Documents :</strong>
+      {% if requete.documents.exists %}
+        <ul class="list-disc pl-4">
+        {% for doc in requete.documents.all %}
+          <li>
+            <a href="{{ doc.fichier.url }}" target="_blank" class="text-blue-500 underline">
+              {{ doc.fichier.name|slice:"10:" }}
+            </a>
+          </li>
+        {% endfor %}
+        </ul>
       {% else %}
-      Aucun document
+        Aucun document
       {% endif %}
     </p>
     <p><strong>Date de création :</strong> {{ requete.date_creation }}</p>
   </div>
 
-  <a href="{% url 'lister_requetes' %}" class="mt-4 inline-block bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Retour</a>
+  <a href="{% url 'liste_requetes' %}" class="mt-4 inline-block bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Retour</a>
+  <a href="{% url 'modifier_requete' requete.id %}" class="text-orange-500 hover:underline">Modifier</a>
 </div>
 {% endblock %}
+

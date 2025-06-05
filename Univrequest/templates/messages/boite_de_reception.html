@@ -1,57 +1,44 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load myfilters %}  {# si dict_lookup est un filtre custom #}
 
 {% block content %}
-<div class="max-w-3xl mx-auto p-6 bg-white shadow rounded">
-    <div class="flex items-center justify-between mb-4">
-        <h2 class="text-2xl font-bold">Boîte de réception</h2>
-        <a href="{% url 'envoyer_message' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded shadow">
-          Nouveau message
-        </a>
-    </div>
-  
-  {% if messages %}
-    <ul class="space-y-4">
-      {% for message in messages %}
-        <li class="border border-gray-300 rounded p-4 {% if not message.lu %}bg-gray-100{% endif %}">
-          <p class="text-sm text-gray-500">De : <span class="font-semibold">{{ message.expediteur }}</span></p>
-          <p class="text-sm text-gray-500">
-            Sujet : 
-            <a href="{% url 'lire_message' message.id %}" class="text-blue-600 hover:underline font-semibold">
-              {{ message.sujet }}
-            </a>
-          </p>
-          <p class="text-xs text-gray-400 mt-1">Date : {{ message.date_envoie|date:"d/m/Y H:i" }}</p>
-          <p class="mt-2 text-gray-700 line-clamp-3">{{ message.contenu|truncatewords:20 }}</p>
-          
-          {% if message.fichiers.all %}
-            <div class="mt-2">
-              <span class="text-sm font-medium">Pièces jointes :</span>
-              <ul class="list-disc ml-4">
-                {% for fichier in message.fichiers.all %}
-                  <li>
-                    <a href="{{ fichier.fichier.url }}" target="_blank" class="text-blue-500 hover:underline">
-                      {{ fichier.nom }}
-                    </a>
-                  </li>
-                {% endfor %}
-              </ul>
-            </div>
-          {% endif %}
+<div class="max-w-4xl mx-auto py-8">
+    <h2 class="text-3xl font-bold text-center mb-6">📥 Boîte de réception</h2>
 
-          <div class="mt-2 text-xs">
-            Statut : 
-            {% if message.lu %}
-              <span class="text-green-600 font-semibold">Lu</span>
-            {% else %}
-              <span class="text-red-600 font-semibold">Non lu</span>
-            {% endif %}
-          </div>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p class="text-gray-600">Aucun message pour le moment.</p>
-  {% endif %}
+    {% if groupes_messages.items %}
+        <div class="space-y-6">
+            {% for expediteur, messages in groupes_messages.items %}
+                <div class="p-4 bg-white shadow rounded-lg border">
+                    <div class="flex justify-between items-center mb-2">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800">👤 {{ expediteur.username }}</h3>
+                            <p class="text-sm text-gray-500">{{ messages|length }} message(s)</p>
+                        </div>
+                        <span class="text-sm px-3 py-1 rounded-full bg-red-100 text-red-600">
+                            {{ non_lus|dict_lookup:expediteur }} nouveau(x)
+                        </span>
+                    </div>
+
+                    <ul class="divide-y">
+                        {% for msg in messages %}
+                            <li class="py-2 {% if not msg.lu %}bg-green-100{% else %}bg-gray-50{% endif %} px-3">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <p class="font-medium">📄 {{ msg.sujet }}</p>
+                                        <p class="text-sm text-gray-600">{{ msg.date_envoie|date:"d/m/Y H:i" }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <a href="{% url 'lire_conversation' expediteur.id %}" class="text-blue-600 hover:underline text-sm">Lire</a>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-gray-600 mt-6">📭 Aucun message pour le moment.</p>
+    {% endif %}
 </div>
 {% endblock %}

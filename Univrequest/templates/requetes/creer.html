@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block creerreq %}
+<div class="container mx-auto py-4">
+    <h1 class="text-2xl font-bold mb-4">Créer une requête</h1>
+    <form method="POST" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+
+        <div>
+            <label for="titre" class="block font-medium">Titre :</label>
+            <input type="text" name="titre" id="titre"
+                   class="border rounded px-3 py-2 w-full"
+                   placeholder="Saisissez le titre de la requête" required>
+        </div>
+
+        <div>
+            <label for="descrition" class="block font-medium">Description :</label>
+            <textarea name="descrition" id="descrition"
+                      class="border rounded px-3 py-2 w-full"
+                      placeholder="Description détaillée"></textarea>
+        </div>
+
+        <div>
+            <label for="priorite" class="block font-medium">Priorité :</label>
+            <select name="priorite" id="priorite" class="border rounded px-3 py-2 w-full">
+                <option value="faible">Faible</option>
+                <option value="moyenne" selected>Moyenne</option>
+                <option value="haute">Haute</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="type_requete" class="block font-medium">Type de requête :</label>
+            <select name="type_requete" id="type_requete" class="border rounded px-3 py-2 w-full">
+                {% for type in types_requetes %}
+                <option value="{{ type.id }}">{{ type.libelle }}</option>
+                {% endfor %}     
+            </select>
+        </div>
+
+        <div>
+            <label class="block font-medium">Documents (vous pouvez en sélectionner plusieurs) :</label>
+            <input type="file" name="documents" multiple class="border p-2 rounded w-full" />
+        </div>
+
+        <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded">Envoyer</button>
+        <a href="{% url 'etudiant' %}" class="ml-4 text-gray-600">Annuler</a>
+    </form>
+</div>
+{% endblock %}

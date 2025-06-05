@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm,UserChangeForm
 
-from Univrequest.models import Documents, Requetes, User,Message
+from Univrequest.models import Documents, Requetes, TypeRequetes, User,Message
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -62,7 +62,7 @@ class MessageForm(forms.ModelForm):
 
     class Meta:
         model = Message
-        fields = ['destinataire', 'sujet', 'contenu']
+        fields = ['sujet', 'contenu', 'fichiers']
 
         widgets = {
             'destinataire': forms.Select(attrs={'class': 'form-select'}),
@@ -108,7 +108,7 @@ class ReceptionnisteUserChangeForm(forms.ModelForm):
 class RequeteReceptionnisteForm(forms.ModelForm):
     class Meta:
         model = Requetes
-        fields = ('statut', 'priorite', 'document', 'descrition')
+        fields = ('statut', 'priorite', 'documents', 'descrition')
         widgets = {
             'statut': forms.Select(attrs={'class': 'border rounded p-2'}),
             'note_traitement': forms.Textarea(attrs={
@@ -117,3 +117,15 @@ class RequeteReceptionnisteForm(forms.ModelForm):
                 'placeholder': 'Ajouter une note…'
             }),
         }
+
+
+class RequeteForm(forms.ModelForm):
+    class Meta:
+        model = Requetes
+        exclude = ['utilisateur', 'documents', 'date_creation', 'date_suppression', 'statut']
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Force l’affichage de tous les types de requêtes
+        self.fields['type_requete'].queryset = TypeRequetes.objects.all()
+        self.fields['type_requete'].empty_label = "Sélectionnez un type"

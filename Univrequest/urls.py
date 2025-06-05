@@ -11,10 +11,15 @@ urlpatterns = [
     path("logout/", auth_views.LogoutView.as_view(next_page="home"), name="logout"),
     path('envoyer/', views.envoyer_message, name='envoyer_message'),
     path('boite/', views.boite_de_reception, name='boite_de_reception'),
+    path('conversation/<int:expediteur_id>/', views.lire_conversation, name='lire_conversation'),
+    path('message/<int:message_id>/', views.lire_message, name='lire_message'),
+    path('messages/repondre/<int:message_id>/', views.repondre_message, name='repondre_message'),
     path('utilisateurs/', views.gerer_utilisateurs, name='gestion_utilisateurs'),
     path('utilisateurs/<int:user_id>/modifier/', views.modifier_utilisateur, name='modifier_utilisateur'),
     path('utilisateurs/<int:user_id>/supprimer/', views.supprimer_utilisateur, name='supprimer_utilisateur'),
-    path('requetes/', views.lister_requetes, name='lister_requetes'),
+    path('requetes/', views.lister_requetes, name='liste_requetes'),
     path('requetes/<int:requete_id>/', views.detail_requete, name='detail_requete'),
     path('requetes/<int:requete_id>/modifier/', views.modifier_requete, name='modifier_requete'),
+    path('requetes/creer/', views.creer_requete, name='creer_requete'),
+
 ]

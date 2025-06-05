@@ -1,12 +1,20 @@
+from collections import defaultdict
 from django.shortcuts import get_object_or_404, render,redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,user_passes_test
 from django.db.models import Q
 
-from Univrequest.form import CustomUserChangeForm, CustomUserCreationForm, MessageForm, ReceptionnisteUserChangeForm, RequeteReceptionnisteForm
-from Univrequest.models import Documents, Message, Requetes, User
+from Univrequest.form import CustomUserChangeForm, CustomUserCreationForm, MessageForm, ReceptionnisteUserChangeForm, RequeteForm, RequeteReceptionnisteForm
+from Univrequest.models import Documents, Message, Requetes, TypeRequetes, User
 
+
+def etudiant_required(view_func):
+    decorated_view_func = user_passes_test(
+        lambda user: user.is_authenticated and user.is_etudiant,
+        login_url='home'
+    )(view_func)
+    return decorated_view_func
 
 
 def home(request):
@@ -45,12 +53,56 @@ def register(request):
     return render(request, 'register.html', {'form': form})
 
 
+@etudiant_required
 def etudiant(request):
-    return render(request,'etudiant.html')
+    utilisateur = request.user
 
+    requetes_en_attentes = Requetes.objects.filter(utilisateur=utilisateur, statut='en_attente').count()
+    requetes_en_cours = Requetes.objects.filter(utilisateur=utilisateur, statut='en_cours').count()
+    requetes_traitees = Requetes.objects.filter(utilisateur=utilisateur, statut='traitee').count()
+    requetes_rejetees = Requetes.objects.filter(utilisateur=utilisateur, statut='rejete').count()
 
+    messages_non_lus = Message.objects.filter(destinataire=utilisateur, lu=False).count()
+
+    context = {
+        'requetes_en_attentes': requetes_en_attentes,
+        'requetes_en_cours': requetes_en_cours,
+        'requetes_traitees': requetes_traitees,
+        'requetes_rejetees': requetes_rejetees,
+        'messages_non_lus': messages_non_lus,
+    }
+    return render(request, 'etudiant.html', context)
+
+@login_required
 def receptionniste(request):
-    return render(request,'receptionniste.html')
+    admin_filiere = request.user.filiere
+
+    # Récupérer les requêtes des étudiants de la même filière
+    requetes = Requetes.objects.filter(
+        utilisateur__filiere=admin_filiere,
+        utilisateur__is_etudiant=True
+    )
+
+    requetes_en_cours = requetes.filter(statut='en_cours').count()
+    requetes_en_att = requetes.filter(statut='en_attente').order_by('-date_creation')[:10]
+    requetes_traitees = requetes.filter(statut='traitee').count()
+    requetes_rejetees = requetes.filter(statut='rejete').count()
+    total_requetes = requetes.count()
+
+    # Messages non lus pour le réceptionniste
+    messages_non_lus = Message.objects.filter(destinataire=request.user, lu=False).count()
+
+    context = {
+        'requetes_en_cours': requetes_en_cours,
+        'requetes_en_att': requetes_en_att,
+        'requetes_traitees': requetes_traitees,
+        'requetes_rejetees': requetes_rejetees,
+        'total_requetes': total_requetes,
+        'messages_non_lus': messages_non_lus,
+        'requetes': requetes.order_by('-date_creation')[:10]
+        
+    }
+    return render(request, 'receptionniste.html', context)
 
 
 def logout_view(request):
@@ -58,53 +110,78 @@ def logout_view(request):
     messages.success(request, "Vous avez été déconnecté.")
     return redirect('home')
 
-
+@login_required
 def envoyer_message(request):
-    if request.method == 'POST':
+    if request.method == 'GET':
+        requete_id = request.GET.get('requete_id')
+        initial_data = {}
+
+        if requete_id:
+            requete = get_object_or_404(Requetes, id=requete_id)
+            initial_data['destinataire'] = requete.utilisateur  # automatiquement l'étudiant
+        else:
+            requete = None
+
+        form = MessageForm(initial=initial_data)
+
+        context = {
+            'form': form,
+            'requete': requete,
+        }
+
+        return render(request, 'messages/envoyer.html', context)
+    
+    elif request.method == 'POST':
         form = MessageForm(request.POST, request.FILES)
         if form.is_valid():
-            # Créer le message sans encore enregistrer les fichiers
             message = form.save(commit=False)
             message.expediteur = request.user
-            message.save()
-            form.save_m2m()  # Sauvegarde des relations M2M classiques si besoin
 
-            # Gestion des fichiers uploadés
+            # Récupération sécurisée de la requête
+            requete_id = request.POST.get('requete_id')
+            if requete_id:
+                try:
+                    requete = Requetes.objects.get(id=requete_id)
+                    message.requete = requete
+                    message.destinataire = requete.utilisateur  # c’est ici que tu assures que le bon étudiant reçoit
+                except Requetes.DoesNotExist:
+                    pass
+
+            message.save()
+
             fichiers = request.FILES.getlist('fichiers_upload')
             for fichier in fichiers:
                 doc = Documents.objects.create(fichier=fichier, nom=fichier.name)
                 message.fichiers.add(doc)
 
             message.save()
-            return redirect('boite_de_reception')  # Ton URL de redirection
+            return redirect('boite_de_reception')
     else:
         form = MessageForm()
+
     return render(request, 'messages/envoyer.html', {'form': form})
+
 
 @login_required
 def boite_de_reception(request):
-    messages = Message.objects.filter(destinataire=request.user).order_by('-date_envoie')
-    messages.filter(lu=False).update(lu=True)
-    return render(request, 'messages/boite_de_reception.html', {'messages': messages})
+    # Tous les messages reçus
+    messages_recus = Message.objects.filter(destinataire=request.user).order_by('-date_envoie')
 
+    # Dictionnaires pour regrouper et compter
+    groupes = defaultdict(list)
+    non_lus = defaultdict(int)
 
-def dashboard_etudiant(request):
-    user = request.user
-    
-    # Exemple du compteur pour l'utilisateur connecté
-    messages_non_lus = Message.objects.filter(destinataire=user, lu=False).count()
+    for msg in messages_recus:
+        expediteur = msg.expediteur
+        groupes[expediteur].append(msg)
+        if not msg.lu:
+            non_lus[expediteur] += 1
 
-    # Les autres compteurs
-    requetes_en_cours = Requetes.objects.filter(user=user, statut='en_cours').count()
-    requetes_traitees = Requetes.objects.filter(user=user, statut='traite').count()
-
-    context = {
-        'requetes_en_cours': requetes_en_cours,
-        'requetes_traitees': requetes_traitees,
-        'messages_non_lus': messages_non_lus,
-        # ... autres variables si besoin
-    }
-    return render(request, 'etudiant.html', context)
+    # Envoie au template
+    return render(request, 'messages/boite_de_reception.html', {
+        'groupes_messages': dict(groupes),
+        'non_lus': dict(non_lus),
+    })
 
 
 @login_required
@@ -129,29 +206,6 @@ def lire_message(request, message_id):
 
     # Afficher le message dans le template "lire_message.html"
     return render(request, 'messages/lire_message.html', context)
-
-
-@login_required
-def admin_dashboard(request):
-    # Filtrage des requêtes selon la filière de l’admin
-    admin_filiere = request.user.filiere
-    requetes = Requetes.objects.filter(etudiant__filiere=admin_filiere)
-
-    requetes_en_attente = requetes.filter(statut='en_cours').count()
-    requetes_traitees = requetes.filter(statut='traite').count()
-    total_requetes = requetes.count()
-    
-    # Messages non lus pour l’admin
-    messages_non_lus = Message.objects.filter(destinataire=request.user, lu=False).count()
-
-    context = {
-        'requetes_en_attente': requetes_en_attente,
-        'requetes_traitees': requetes_traitees,
-        'total_requetes': total_requetes,
-        'messages_non_lus': messages_non_lus,
-        'requetes': requetes.order_by('-date_creation')[:10]
-    }
-    return render(request, 'receptionniste.html', context)
 
 
 def is_receptionniste(user):
@@ -244,8 +298,96 @@ def modifier_requete(request, requete_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Requête mise à jour avec succès.")
-            return redirect('lister_requetes')
+            return redirect('liste_requetes')
     else:
         form = RequeteReceptionnisteForm(instance=requete)
 
     return render(request, 'requetes/modifier.html', {'form': form, 'requete': requete})
+
+
+@login_required
+def creer_requete(request):
+    types_requetes = TypeRequetes.objects.all()
+
+    if request.method == 'POST':
+        # Récupérer les champs "manuellement" puisque tu n'utilises plus form.as_p
+        titre = request.POST.get('titre')
+        descrition = request.POST.get('descrition')
+        priorite = request.POST.get('priorite')
+        type_requete_id = request.POST.get('type_requete')
+        fichiers = request.FILES.getlist('documents')
+
+        # Vérifie que les champs obligatoires sont présents
+        if titre and type_requete_id:
+            type_requete = TypeRequetes.objects.get(pk=type_requete_id)
+
+            requete = Requetes.objects.create(
+                utilisateur=request.user,
+                type_requete=type_requete,
+                titre=titre,
+                descrition=descrition,
+                priorite=priorite
+            )
+
+            # Sauvegarder les documents
+            for fichier in fichiers:
+                doc = Documents.objects.create(
+                    fichier=fichier,
+                    nom_fichier=fichier.name,
+                    chemin_fichier=fichier.name,  # ou un autre champ si tu veux stocker le chemin
+                    type_fichier=fichier.content_type,
+                    taille=fichier.size
+                )
+                requete.documents.add(doc)
+
+            return redirect('etudiant')
+    return render(request, 'requetes/creer.html', {'types_requetes': types_requetes})
+
+
+@login_required
+def repondre_message(request, message_id):
+    message_original = get_object_or_404(Message, id=message_id)
+
+    if request.method == "POST":
+        form = MessageForm(request.POST, request.FILES)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.expediteur = request.user
+            message.destinataire = message_original.expediteur
+            message.requete = message_original.requete  # Ajouté pour éviter l'erreur d'intégrité
+            message.save()
+
+            # Gérer le fichier joint si présent
+            if request.FILES.get('fichier'):
+                Documents.objects.create(
+                    message=message,
+                    fichier=request.FILES['fichier'],
+                    nom=request.FILES['fichier'].name
+                )
+
+            return redirect('boite_de_reception')
+    else:
+        form = MessageForm(initial={'sujet': f"Re: {message_original.sujet}"})
+
+    return render(request, 'messages/repondre.html', {
+        'form': form,
+        'message_original': message_original,
+        'destinataire_nom': message_original.expediteur.get_full_name(),
+    })
+
+
+@login_required
+def lire_conversation(request, expediteur_id):
+    user = request.user
+    messages = Message.objects.filter(
+        Q(expediteur__id=expediteur_id, destinataire=user) |
+        Q(expediteur=user, destinataire__id=expediteur_id)
+    ).order_by('date_envoie')
+
+    # Marquer comme lus les messages que l'utilisateur a reçus
+    messages.filter(destinataire=user, lu=False).update(lu=True)
+
+    return render(request, 'messages/conversation.html', {
+        'messages': messages,
+        'expediteur': messages.first().expediteur if messages else None
+    })

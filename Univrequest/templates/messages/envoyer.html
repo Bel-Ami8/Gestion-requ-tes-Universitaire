@@ -45,7 +45,12 @@
         <p class="text-red-500 text-sm mt-1">{{ form.fichiers_upload.errors }}</p>
       {% endif %}
     </div>
-    
+    <div>
+      {% if requete %}
+        <input type="hidden" name="requete_id" value="{{ requete.id }}">
+      {% endif %}
+    </div>
+
     <!-- Bouton -->
     <div>
       <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
