@@ -129,3 +129,16 @@ class RequeteForm(forms.ModelForm):
         # Force l’affichage de tous les types de requêtes
         self.fields['type_requete'].queryset = TypeRequetes.objects.all()
         self.fields['type_requete'].empty_label = "Sélectionnez un type"
+
+
+class RapportForm(forms.Form):
+    CHOIX_PERIODE = [
+        ('jour', 'Aujourd’hui'),
+        ('date', 'Date précise'),
+        ('semaine', 'Cette semaine'),
+        ('mois', 'Ce mois'),
+        ('mois_precis', 'Mois précis'),
+    ]
+    periode = forms.ChoiceField(choices=CHOIX_PERIODE)
+    date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+    mois = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'month'}))

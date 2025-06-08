@@ -1,12 +1,24 @@
 from collections import defaultdict
+from datetime import datetime, timedelta
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render,redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.db.models import Q
+from django.utils.timezone import now
+from django.utils import timezone
+from django.template.loader import get_template
+from django.views.decorators.http import require_POST
+import weasyprint
+from django.templatetags.static import static
+from django.core.files.base import ContentFile
+from django.core.paginator import Paginator
+import os
 
-from Univrequest.form import CustomUserChangeForm, CustomUserCreationForm, MessageForm, ReceptionnisteUserChangeForm, RequeteForm, RequeteReceptionnisteForm
-from Univrequest.models import Documents, Message, Requetes, TypeRequetes, User
+from Univrequest.form import CustomUserChangeForm, CustomUserCreationForm, MessageForm, RapportForm, ReceptionnisteUserChangeForm, RequeteForm, RequeteReceptionnisteForm
+from Univrequest.models import Documents, Message, Rapport, Requetes, TypeRequetes, User
+from Univrequest.utils import generer_pdf_rapport
 
 
 def etudiant_required(view_func):
@@ -391,3 +403,77 @@ def lire_conversation(request, expediteur_id):
         'messages': messages,
         'expediteur': messages.first().expediteur if messages else None
     })
+
+
+@login_required
+def page_rapports(request):
+    if request.method == "POST":
+        periode = request.POST.get("periode")
+        aujourd_hui = timezone.now().date()
+
+        if periode == "jour":
+            date_debut = date_fin = aujourd_hui
+        elif periode == "semaine":
+            date_debut = aujourd_hui - timedelta(days=7)
+            date_fin = aujourd_hui
+        elif periode == "mois":
+            date_debut = aujourd_hui.replace(day=1)
+            date_fin = aujourd_hui
+        elif periode == "personnalise":
+            date_debut = request.POST.get("date_debut")
+            date_fin = request.POST.get("date_fin")
+            if not date_debut or not date_fin:
+                messages.error(request, "Veuillez fournir les deux dates.")
+                return redirect("page_rapports")
+            date_debut = datetime.strptime(date_debut, "%Y-%m-%d").date()
+            date_fin = datetime.strptime(date_fin, "%Y-%m-%d").date()
+        else:
+            messages.error(request, "Période invalide.")
+            return redirect("page_rapports")
+
+        nom_pdf, fichier_pdf = generer_pdf_rapport(date_debut, date_fin, request.user, periode)
+
+        rapport = Rapport.objects.create(
+            periode=periode,
+            date_debut=date_debut,
+            date_fin=date_fin,
+            filtre_description=f"Requêtes du {date_debut} au {date_fin}",
+            utilisateur=request.user,
+        )
+        rapport.fichier_pdf.save(nom_pdf, fichier_pdf)
+        messages.success(request, "Rapport généré avec succès.")
+        return redirect("page_rapports")
+
+    rapports = Rapport.objects.filter(utilisateur=request.user).order_by("-date_generation")
+    paginator = Paginator(rapports, 5)
+    page = request.GET.get("page")
+    rapports_page = paginator.get_page(page)
+
+    return render(request, "page_rapports.html", {"rapports": rapports_page})
+
+
+
+@login_required
+def supprimer_rapport(request, pk):
+    rapport = get_object_or_404(Rapport, pk=pk, utilisateur=request.user)
+    rapport.fichier_pdf.delete(save=False)
+    rapport.delete()
+    messages.success(request, "Rapport supprimé avec succès.")
+    return redirect("page_rapports")
+
+
+@login_required
+def mon_compte(request):
+    return render(request, 'utilisateur/mon_compte.html', {'user': request.user})
+
+@login_required
+def modifier_compte(request):
+    user = request.user
+    if request.method == 'POST':
+        user.first_name = request.POST.get('first_name')
+        user.last_name = request.POST.get('last_name')
+        user.email = request.POST.get('email')
+        user.save()
+        messages.success(request, "Vos informations ont été mises à jour.")
+        return redirect('mon_compte')
+    return render(request, 'utilisateur/modifier_compte.html', {'user': user})

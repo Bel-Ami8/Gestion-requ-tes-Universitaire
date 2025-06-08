@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
-{% block title %}Espace Administrateur{% endblock %}
 
+{% block title %}Espace Administrateur{% endblock %}
 {% block content %}
 <div class="space-y-6">
     <!-- En-tête d'accueil -->
@@ -50,7 +50,7 @@
                 </svg>
                 Gérer les utilisateurs
             </a>
-            <a href="#" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700">
+            <a href="{% url 'page_rapports' %}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700">
                 <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>

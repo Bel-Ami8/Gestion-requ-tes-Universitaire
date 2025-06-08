@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block genrap %}
+<div class="p-4 max-w-4xl mx-auto">
+
+  <h1 class="text-2xl font-bold mb-4">Générer un rapport</h1>
+
+  <form method="post" class="space-y-4 bg-white p-4 rounded shadow">
+    {% csrf_token %}
+    <select name="periode" class="w-full border rounded p-2">
+      <option value="">Choisir une période</option>
+      <option value="jour">Aujourd'hui</option>
+      <option value="semaine">Cette semaine</option>
+      <option value="mois">Ce mois</option>
+      <option value="personnalise">Personnalisée</option>
+    </select>
+    <div class="flex space-x-2">
+      <input type="date" name="date_debut" class="border p-2 rounded w-1/2">
+      <input type="date" name="date_fin" class="border p-2 rounded w-1/2">
+    </div>
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+      Générer
+    </button>
+  </form>
+
+  <h2 class="text-xl font-semibold mt-8 mb-4">Rapports récents</h2>
+
+  {% for rapport in rapports %}
+  <div class="bg-gray-50 border p-3 mb-3 rounded flex justify-between items-center">
+    <div>
+      <p class="font-medium">Période : {{ rapport.periode }} — du {{ rapport.date_debut }} au {{ rapport.date_fin }}</p>
+      <p class="text-sm text-gray-600">Généré le {{ rapport.date_generation|date:"d/m/Y à H:i" }}</p>
+    </div>
+    <div class="flex space-x-2">
+      {% if rapport.fichier_pdf %}
+         <a href="{{ rapport.fichier_pdf.url }}" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Télécharger</a>
+      {% else %}
+         <span class="text-gray-400 italic">Aucun fichier</span>
+      {% endif %}
+
+      <a href="{% url 'supprimer_rapport' rapport.id %}" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+         onclick="return confirm('Supprimer ce rapport ?')">Supprimer</a>
+    </div>
+  </div>
+  {% empty %}
+  <p>Aucun rapport trouvé.</p>
+  {% endfor %}
+
+  <div class="mt-4">
+    {% if rapports.has_previous %}
+      <a href="?page={{ rapports.previous_page_number }}" class="mr-2">← Précédent</a>
+    {% endif %}
+    {% if rapports.has_next %}
+      <a href="?page={{ rapports.next_page_number }}">Suivant →</a>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

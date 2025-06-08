@@ -105,15 +105,22 @@ class Documents(models.Model):
     def __str__(self):
         return self.nom_fichier
 
-
 class Rapport(models.Model):
-    date_traitement = models.DateTimeField()
-    resultat = models.TextField(blank=True, null=True)
-    commentaire = models.TextField(blank=True, null=True)
+    date_generation = models.DateTimeField(auto_now_add=True)
+    periode = models.CharField(max_length=50, choices=[
+        ('jour', 'Jour'),
+        ('semaine', 'Semaine'),
+        ('mois', 'Mois'),
+        ('personnalise', 'Date spécifique'),
+    ])
+    date_debut = models.DateField()
+    date_fin = models.DateField()
+    filtre_description = models.TextField()  # Résumé des critères
     utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    fichier_pdf = models.FileField(upload_to='rapports_pdfs/')
 
     def __str__(self):
-        return f"Rapport {self.id} - {self.date_traitement}"
+        return f"Rapport généré le {self.date_generation.strftime('%d/%m/%Y')} par {self.utilisateur}"
 
 
 class MiseAJourRequete(models.Model):

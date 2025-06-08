@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
-from Univrequest.views import home,register,receptionniste,etudiant
+from Univrequest.views import home, modifier_compte, mon_compte, page_rapports,register,receptionniste,etudiant
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -21,5 +21,9 @@ urlpatterns = [
     path('requetes/<int:requete_id>/', views.detail_requete, name='detail_requete'),
     path('requetes/<int:requete_id>/modifier/', views.modifier_requete, name='modifier_requete'),
     path('requetes/creer/', views.creer_requete, name='creer_requete'),
+    path("rapports/", views.page_rapports, name="page_rapports"),
+    path("rapports/supprimer/<int:pk>/", views.supprimer_rapport, name="supprimer_rapport"),
+    path('compte/', mon_compte, name='mon_compte'),
+    path('compte/modifier/', modifier_compte, name='modifier_compte'),
 
 ]

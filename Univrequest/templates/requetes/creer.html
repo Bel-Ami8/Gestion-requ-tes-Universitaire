@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block creerreq %}
-<div class="container mx-auto py-4">
+<div class="container mx-auto py-4 bg-amber-50 rounded-3xl p-5">
     <h1 class="text-2xl font-bold mb-4">Créer une requête</h1>
     <form method="POST" enctype="multipart/form-data" class="space-y-4">
         {% csrf_token %}
@@ -42,7 +42,7 @@
             <input type="file" name="documents" multiple class="border p-2 rounded w-full" />
         </div>
 
-        <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded">Envoyer</button>
+        <button type="submit" class="bg-green-500 hover:bg-green-800 text-white py-2 px-4 rounded">Envoyer</button>
         <a href="{% url 'etudiant' %}" class="ml-4 text-gray-600">Annuler</a>
     </form>
 </div>
